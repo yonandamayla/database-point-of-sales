@@ -87,6 +87,9 @@ INSERT INTO supplier_item (id, quantity, price, no_telp, name) VALUES
     (002, 100, 5000, 081234567891, 'Roziqin'),
     (003, 100, 6000, 081234567892, 'Aisyah');
 
+-- menampilkan item dari supplier dan siapa suppliernya
+SELECT * FROM supplier_item;
+
 /*10* = makanan owner
 20* = minuman owner
 30* = sambal owner
@@ -131,6 +134,21 @@ INSERT INTO item (id, name, price, supplier_item_id) VALUES
     (402, 'Empal Sapi', 5000, 002),
     (501, 'Trily', 6000, 003);
 
+-- menampilkan item yang dijual di warung makan (makanan, minuman, sambal), baik dari supplier maupun buatan sendiri
+SELECT * FROM item;
+
+-- mengurutkan daftar menu dari termurah ke termahal
+SELECT * FROM item ORDER BY price ASC;
+
+-- mengurutkan daftar menu dari termahal ke termurah
+SELECT * FROM item ORDER BY price DESC;
+
+-- menampilkan item yang dijual oleh owner saja
+SELECT * FROM item WHERE supplier_item_id IS NULL;
+
+-- menampilkan item yang dijual oleh supplier saja
+SELECT * FROM item WHERE supplier_item_id IS NOT NULL;
+
 INSERT INTO employee (id, name, no_telp, role, entry_date, salary, gender, address) VALUES
     (001, 'Mugik Hidayati', 081234567890, 'Owner', '2022-01-01', 3900000, 'Perempuan', 'Jl. Remujung No. 04'),
     (002, 'Aminin', 081234567891, 'Pembantu', '2022-05-02', 2500000, 'Laki - Laki', 'Jl. Remujung No. 04'),
@@ -139,6 +157,9 @@ INSERT INTO employee (id, name, no_telp, role, entry_date, salary, gender, addre
     (005, 'Sopiah', 081234567894, 'Pelayan', '2021-01-01', 3000000, 'Perempuan', 'Jl. Simbar Menjangan No. 05'),
     (006, 'Karminah', 081234567895, 'Juru Masak', '2022-01-01', 3900000, 'Perempuan', 'Jl. Raya Singosari No. 06'),
     (007, 'Siti', 081234567896, 'Juru Masak', '2022-01-01', 3900000, 'Perempuan', 'Jl. Simbar Menjangan No. 08');
+
+-- menampilkan data pegawai
+SELECT * FROM employee;
 
 INSERT INTO `order` (id, time, payment_method, total, payment, money_change, employee_id) VALUES
     (001, '2024-06-06 07:30:00', 'Cash', 80000, 10000, 2000, 004),
@@ -152,6 +173,9 @@ INSERT INTO `order` (id, time, payment_method, total, payment, money_change, emp
     (009, '2022-06-08 08:00:00', 'Qris', 20000, 20000, NULL, 004),
     (010, '2022-06-08 15:00:00', 'Cash', 23000, 25000, 2000, 004);
 
+-- menampilkan data order / pesanan dari customer
+SELECT * FROM `order`;
+
 INSERT INTO detail_order (id, price_unit, quantity, item_id, order_id) VALUES
     (001, 4000, 1, 101, 001),
     (002, 1000, 2, 102, 002),
@@ -164,6 +188,9 @@ INSERT INTO detail_order (id, price_unit, quantity, item_id, order_id) VALUES
     (009, 2000, 1, 109, 009),
     (010, 2000, 1, 110, 010);
 
+-- menampilkan detail order / detail pesanan dari customer
+SELECT * FROM detail_order;
+
 INSERT INTO attendance (id, shift, attendace_date, attendance_status, employee_id) VALUES
     (001, 'Pagi', '2022-06-06 07:30:00', 'Hadir', 004),
     (002, 'Pagi', '2022-06-06 09:00:00', 'Hadir', 004),
@@ -171,7 +198,10 @@ INSERT INTO attendance (id, shift, attendace_date, attendance_status, employee_i
     (004, 'Sore', '2022-06-06 12:00:00', 'Hadir', 004),
     (005, 'Sore', '2022-06-06 12:00:00', 'Hadir', 005),
     (006, 'Sore', '2022-06-06 12:00:00', 'Hadir', 006),
-    (007, 'Sore', '2022-06-06 12:00:00', NULL, 007);
+    (007, 'Sore', '2022-06-06 12:00:00', 'Absen', 007);
+
+-- menampilkan presensi pegawai
+SELECT * FROM attendance;
 
 INSERT INTO ingredients (id, description, price, quantity, name) VALUES
     (001, 'Bawang Merah', 50000, '5 kg', 'Bawang Merah'),
@@ -184,4 +214,7 @@ INSERT INTO ingredients (id, description, price, quantity, name) VALUES
     (008, 'Minyak Goreng', 200000, '4 liter', 'Minyak Goreng'),
     (009, 'Tepung Terigu', 50000, '5 kg', 'Tepung Terigu'),
     (010, 'Telur', 60000, '5 kg', 'Telur');
+
+-- menampilkan ingredients / bahan mentah untuk masakan milik owner
+SELECT * FROM ingredients;
 
