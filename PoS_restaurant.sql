@@ -82,6 +82,7 @@ CREATE TABLE expense (
     FOREIGN KEY (ingredients_id) REFERENCES ingredients(id)
 );
 
+
 INSERT INTO supplier_item (id, quantity, price, no_telp, name) VALUES 
     (001, 100, 4000, 081234567890, 'Roida'),
     (002, 100, 5000, 081234567891, 'Roziqin'),
@@ -171,7 +172,18 @@ INSERT INTO `order` (id, time, payment_method, total, payment, money_change, emp
     (007, '2022-06-07 15:45:00', 'Cash', 40000, 50000, 10000, 004),
     (008, '2022-06-07 18:55:00', 'Qris', 14000, 14000, NULL, 004),
     (009, '2022-06-08 08:00:00', 'Qris', 20000, 20000, NULL, 004),
-    (010, '2022-06-08 15:00:00', 'Cash', 23000, 25000, 2000, 004);
+    (010, '2022-06-08 15:00:00', 'Cash', 23000, 25000, 2000, 004),
+    (011, '2022-06-08 18:00:00', 'Cash', 20000, 25000, 5000, 004),
+    (012, '2022-06-08 20:00:00', 'Qris', 30000, 30000, NULL, 004),
+    (013, '2022-06-09 12:00:00', 'Cash', 10000, 15000, 5000, 004),
+    (014, '2022-06-09 15:00:00', 'Qris', 20000, 20000, NULL, 004),
+    (015, '2022-06-09 18:00:00', 'Cash', 30000, 30000, NULL, 004),
+    (016, '2022-06-09 20:00:00', 'Cash', 20000, 25000, 5000, 004),
+    (017, '2022-06-10 12:00:00', 'Qris', 10000, 15000, 5000, 004),
+    (018, '2022-06-10 15:00:00', 'Cash', 20000, 20000, NULL, 004),
+    (019, '2022-06-10 18:00:00', 'Cash', 30000, 30000, NULL, 004),
+    (020, '2022-06-10 20:00:00', 'Qris', 20000, 25000, 5000, 004);
+
 
 -- menampilkan data order / pesanan dari customer
 SELECT * FROM `order`;
@@ -217,4 +229,65 @@ INSERT INTO ingredients (id, description, price, quantity, name) VALUES
 
 -- menampilkan ingredients / bahan mentah untuk masakan milik owner
 SELECT * FROM ingredients;
+
+INSERT INTO expense (id, category, total, employee_id, ingredients_id) VALUES
+    (001, 'Gaji Karyawan', 3000000, 004, NULL),
+    (002, 'Gaji Karyawan', 2500000, 005, NULL),
+    (003, 'Gaji Karyawan', 3900000, 006, NULL),
+    (004, 'Gaji Karyawan', 3900000, 007, NULL),
+    (005, 'Listrik', 500000, NULL, NULL),
+    (006, 'Air', 300000, NULL, NULL),
+    (007, 'Gas', 200000, NULL, NULL),
+    (008, 'Sewa Bangunan', 1000000, NULL, NULL),
+    (009, 'Ingredients', 500000, NULL, 001),
+    (010, 'Ingredients', 600000, NULL, 002),
+    (011, 'Ingredients', 1200000, NULL, 003),
+    (012, 'Ingredients', 1500000, NULL, 004),
+    (013, 'Ingredients', 200000, NULL, 005),
+    (014, 'Ingredients', 600000, NULL, 006),
+    (015, 'Ingredients', 2000000, NULL, 007),
+    (016, 'Ingredients', 2000000, NULL, 008),
+    (017, 'Ingredients', 500000, NULL, 009),
+    (018, 'Ingredients', 600000, NULL, 010);
+
+-- menampilkan pengeluaran
+SELECT * FROM expense;
+
+-- fungsi untuk menghitung total pengeluaran
+SELECT SUM(total) FROM expense;
+
+-- fungsi untuk menghitung total pengeluaran berdasarkan kategori
+SELECT category, SUM(total) FROM expense GROUP BY category;
+
+-- fungsi untuk menampilkan jumlah transaksi per hari (SOLUSI)
+SELECT DATE(time) AS date, COUNT(*) AS total_transaction FROM `order` GROUP BY DATE(time);
+
+-- fungsi untuk menampilkan total penjualan per bulan (SOLUSI)
+SELECT MONTH(time) AS month, SUM(total) AS total_sales FROM `order` GROUP BY MONTH(time);
+
+-- fungsi untuk membuat struk pembayaran
+DELIMITER //
+CREATE FUNCTION generate_receipt(order_id INT)
+RETURNS TEXT
+DETERMINISTIC
+BEGIN
+    DECLARE receipt TEXT;
+    SELECT GROUP_CONCAT(CONCAT('Order ID: ', o.id, '\nItem: ', i.name, '\nQuantity: ', do.quantity, '\nTotal Price: ', do.quantity * i.price, '\n-------------------') SEPARATOR '\n')
+    INTO receipt
+    FROM `order` o
+    INNER JOIN detail_order do ON o.id = do.order_id
+    INNER JOIN item i ON do.item_id = i.id
+    WHERE o.id = order_id;
+    RETURN receipt;
+END//
+DELIMITER ;
+
+DROP FUNCTION IF EXISTS generate_receipt;
+
+-- menampilkan struk pembayaran untuk order dengan id 1
+SELECT generate_receipt(1);
+
+-- jika ingin menambahkan item baru pada order 1 
+INSERT INTO detail_order (order_id, item_id, quantity)
+VALUES (1, 102, 2);
 
