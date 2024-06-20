@@ -157,6 +157,30 @@ SELECT * FROM `order` WHERE payment_method = 'Qris';
 -- menampilkan transaksi yang menggunakan metode pembayaran Cash
 SELECT * FROM `order` WHERE payment_method = 'Cash';
 
+-- menampilkan banyaknya transaksi menggunakan method payment cash dan qris
+SELECT payment_method, COUNT(*) as TotalTransactions FROM `order` GROUP BY payment_method;
+
+-- menampilkan  semua item, dan harga nominalnya, dan laku per harinya berapa, jadi ada nama item dan total order per hari, dan seluruh omset totalnya, dan juga menampilkan quantity dari item yang diorder, namun mengambilnya tidak dari tabel item, melainkan dari tabel detail_order
+SELECT 
+    i.name AS ItemName, 
+    i.price AS Price, 
+    DATE(o.time) AS Date, 
+    COUNT(*) AS TotalOrdersPerDay, 
+    SUM(i.price * d.quantity) AS TotalRevenue, 
+    d.quantity AS QuantityOrdered
+FROM 
+    item i
+JOIN 
+    detail_order d ON i.id = d.item_id
+JOIN 
+    `order` o ON d.order_id = o.id
+GROUP BY 
+    ItemName, Date
+ORDER BY 
+    Date;
+
+
+
 -- menampilkan transaksi berdasarkan id ordernya
 SELECT * FROM `order` WHERE id = 1;
 
@@ -184,6 +208,12 @@ FROM `order`
 GROUP BY DATE(time)
 ORDER BY Date;
 
+-- menampilkan transaksi per hari beserta tanggalnya dan total transaksinya
+SELECT DATE(time) as Date, COUNT(*) as TotalTransactions, SUM(total) as TotalAmount
+FROM `order`
+GROUP BY DATE(time)
+ORDER BY Date;
+
 -- menampilkan transaksi per bulan
 SELECT DATE_FORMAT(time, '%Y-%m') as Month, COUNT(*) as TotalTransactions
 FROM `order`
@@ -197,6 +227,7 @@ INSERT INTO detail_order (id, price_unit, quantity, item_id, order_id) VALUES
     (004, 3000, 15, 132, 004),
     (005, 7000, 10, 133, 005),
     (006, 3000, 2, 103, 006);
+-- detail order memerlukan price, agar jika harga dari item berubah, maka harga yang tertera di detail order tidak berubah
 
 -- menampilkan detail order / detail pesanan dari customer
 SELECT * FROM detail_order;
@@ -343,31 +374,22 @@ DROP FUNCTION IF EXISTS generate_receipt;
 -- menampilkan struk pembayaran untuk order dengan id 1
 SELECT generate_receipt(1);
 
--- perhitungan laba bersih per hari (pendapatan - pengeluaran/ total order - expense)
--- DELIMITER //
--- CREATE FUNCTION `calculate_daily_hpp`(date DATE) RETURNS DECIMAL(10,2)
--- BEGIN
---     DECLARE total_income DECIMAL(10,2);
---     DECLARE total_expense DECIMAL(10,2);
---     DECLARE hpp DECIMAL(10,2);
+-- hitunglah laba / profit total yang didapat dari seluruh item yang dijual dikurangi dengan pengeluaran / expense (total order - expense) per harinya berapa
 
---     -- Get the total income for the given date
---     SELECT SUM(total) INTO total_income
---     FROM `order`
---     WHERE DATE(time) = date;
 
---     -- Get the total expense for the given date
---     SELECT SUM(total) INTO total_expense
---     FROM expense
---     WHERE expense_date = date;
+-- menampilkan profit dari owner, dengan rumus total order - expense untuk setiap hari
+SELECT 
+    DATE(o.time) as Date, 
+    (SELECT SUM(i.price * do.quantity) FROM detail_order do JOIN item i ON do.item_id = i.id) - 
+    (SELECT SUM(total) FROM expense WHERE expense_date = Date) AS Profit
+FROM
+    `order` o
+GROUP BY
+    Date;
+    
 
---     -- Calculate the HPP
---     SET hpp = total_income - total_expense;
 
---     RETURN hpp;
--- END//
--- DELIMITER ;
 
--- -- menampilkan laba bersih per hari+
-
--- SELECT `calculate_daily_hpp`('2024-05-01');
+-- SELECT 
+--     (SELECT SUM(i.price * do.quantity) FROM detail_order do JOIN item i ON do.item_id = i.id) - 
+--     (SELECT SUM(total) FROM expense) AS Profit;
